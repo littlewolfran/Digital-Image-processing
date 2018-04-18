@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.1" halcon_version="13.0">
+<procedure name="main">
+<interface/>
+<body>
+<l>dev_update_off ()</l>
+<l>dev_close_window ()</l>
+<l>NumImages:=2</l>
+<l>for Index:=1 to NumImages by 1</l>
+<c>    **读取并且显示图像</c>
+<l>    read_image (Image, 'plan_'+Index$'02')</l>
+<l>    dev_open_window_fit_image (Image, 0, 0, -1, -1, WindowHandle)</l>
+<l>    set_display_font (WindowHandle, 16, 'mono', 'true', 'false')</l>
+<l>    dev_display (Image)</l>
+<l>    disp_message (WindowHandle, 'Original Image', 'window', 12, 12, 'black', 'true')</l>
+<c>    *建立额外的进行处理的图像窗口并设置相应的处理字体</c>
+<l>    get_window_extents (WindowHandle, Row, Column, Width, Height)</l>
+<l>    dev_open_window_fit_image (Image, 0, Width+8, -1, -1, WindowHandle1)</l>
+<l>    set_display_font (WindowHandle1, 14, 'mono', 'true', 'false')</l>
+<l>    dev_open_window_fit_image (Image, 0, Width*2+16, -1, -1, WindowHandle2)</l>
+<l>    set_display_font (WindowHandle2, 14, 'mono', 'true', 'false')</l>
+<c>    *使用导向滤波进行图像处理</c>
+<c>    **如果采用黑色图像作为导向滤波的指导图片，那么源图像中的纹理信息会被平滑，这样使用图像</c>
+<c>    *相减能够提取相应的纹理特征</c>
+<c></c>
+<c>    *产生滤波的导向图片,产生一个特定灰度值的连续的图片</c>
+<l>    gen_image_proto (Image, ImageStructure, 0) </l>
+<l>    for Index:=1 to 3  by 1</l>
+<l>        guided_filter (Image, ImageStructure, ImageStructure, 1.5, 15)</l>
+<l>    endfor</l>
+<c>    *进行图像相减获得图像的纹理特征</c>
+<l>    sub_image (Image, ImageStructure, ImageTexture, 1, 128)</l>
+<c>    *展示图片处理的结果</c>
+<c>    *显示源图像</c>
+<l>    dev_set_window (WindowHandle)</l>
+<l>    dev_display (Image)</l>
+<l>    disp_message (WindowHandle, 'Origin Image'+Index, 'window', 12, 12, 'black', 'true')</l>
+<c>    *显示相应的滤波后的图像</c>
+<l>    dev_set_window (WindowHandle1)</l>
+<l>    dev_display (ImageStructure)</l>
+<l>    disp_message (WindowHandle1, 'Fliter Image', 'window', 12, 12, 'black', 'true')</l>
+<c>    *显示纹理图像</c>
+<l>    dev_set_window (WindowHandle2)</l>
+<l>    dev_display (ImageTexture)</l>
+<l>    disp_message (WindowHandle2, 'Extracted Image', 'window', 12, 12, 'black', 'true')</l>
+<c>    *关闭窗口普进行下一次的处理</c>
+<l>    if (Index &lt; NumImages)</l>
+<l>        disp_continue_message (WindowHandle2, 'black', 'true')</l>
+<l>        stop ()</l>
+<l>        dev_close_window ()</l>
+<l>        dev_close_window ()</l>
+<l>        dev_close_window ()</l>
+<l>    endif</l>
+<l>endfor</l>
+<c></c>
+</body>
+<docu id="main">
+<parameters/>
+</docu>
+</procedure>
+</hdevelop>
