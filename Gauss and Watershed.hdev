@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.1" halcon_version="13.0">
+<procedure name="main">
+<interface/>
+<body>
+<l>dev_close_window ()</l>
+<l>dev_update_window ('off')</l>
+<c></c>
+<c>**获取相关相应的图像</c>
+<l>read_image (Image, 'atoms')</l>
+<l>get_image_size (Image, Width, Height)</l>
+<c></c>
+<c>*把图像种相同区域的规则的小图像切分出来，</c>
+<c></c>
+<l>crop_rectangle1 (Image, Image, Height/2 , 0, Height - 1, Width - 1)</l>
+<c>*获取新图像的大小</c>
+<l>get_image_size (Image, Width, Height)</l>
+<c>*打开图像的窗口</c>
+<l>dev_open_window_fit_image (Image, 0, 0, -1, -1, WindowHandle)</l>
+<c>*设置相应的消息信息</c>
+<l>set_display_font (WindowHandle, 16, 'mono', 'true', 'false')</l>
+<c>*设置图像的表示形式以及显示图像</c>
+<l>dev_set_draw ('fill')</l>
+<l>dev_set_line_width (2)</l>
+<l>dev_display (Image)</l>
+<c>*显示图片的消息以及停止操作</c>
+<l>disp_message (WindowHandle, 'Original image', 'window', 12, 12, 'black', 'true')</l>
+<l>disp_continue_message (WindowHandle, 'black', 'true')</l>
+<l>stop ()</l>
+<c>* ****</c>
+<c>* Segment image</c>
+<c>* ****</c>
+<c>* -&gt; Using watershed</c>
+<c></c>
+<c>*使用高斯滤波平滑图像</c>
+<l>gauss_filter (Image, ImageGauss, 5)</l>
+<c>*使用分水岭获取不同的图像位置</c>
+<l>watersheds (ImageGauss, Basins, Watersheds)</l>
+<c>*显示原始图片并显示相关的分水岭的岭</c>
+<l>dev_display (Image)</l>
+<l>dev_set_colored (12)</l>
+<l>dev_display (Watersheds)</l>
+<l>disp_message (WindowHandle, 'Watersheds', 'window', 12, 12, 'black', 'true')</l>
+<l>disp_continue_message (WindowHandle, 'black', 'true')</l>
+<l>stop ()</l>
+<c> ****</c>
+<c>* Process regions</c>
+<c>* ****</c>
+<c>* -&gt; Skip regions at the border of the image</c>
+<c> </c>
+<c> </c>
+<c> *规则化最小的盆地</c>
+<l>smallest_rectangle1 (Basins, Row1, Column1, Row2, Column2) </l>
+<c>*规则化相关的图像区域</c>
+<l>select_shape (Basins, SelectedRegions1, 'column1', 'and', 2, Width-1)</l>
+<l>select_shape (SelectedRegions1, SelectedRegions2, 'row1', 'and', 2, Height-1)</l>
+<l>select_shape (SelectedRegions2, SelectedRegions3, 'column2', 'and', 1, Width - 3)</l>
+<l>select_shape (SelectedRegions3, Inner, 'row2', 'and', 1, Height - 3)</l>
+<c>***选择不标准的图片</c>
+<l>select_shape (Inner, Irregular, ['moments_i1','moments_i1'], 'or', [0,9.5e8], [1.5e8,1e10])</l>
+<c>*显示相关的图片</c>
+<l>dev_display (Image)</l>
+<l>dev_set_line_width (1)</l>
+<l>dev_set_color ('white')</l>
+<l>dev_display (Inner)</l>
+<l>dev_set_line_width (3)</l>
+<l>dev_set_color ('red')</l>
+<l>dev_display (Irregular)</l>
+<l>disp_message (WindowHandle, 'Defects', 'window', 12, 12, 'black', 'true')</l>
+</body>
+<docu id="main">
+<parameters/>
+</docu>
+</procedure>
+</hdevelop>
